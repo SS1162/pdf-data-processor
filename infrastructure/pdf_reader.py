@@ -60,9 +60,9 @@ class PdfPlumberReader(IPDFReader):
             ExtractionError: If *pdfplumber* raises during PDF parsing.
         """
         if not os.path.isfile(file_path):
-            raise PDFFileNotFoundError(f"PDF file not found: '{file_path}'")
-
-        self._logger.info(f"PdfPlumberReader: opening '{file_path}'")
+            msg = f"PDF file not found: '{file_path}'"
+            self._logger.error(msg)
+            raise PDFFileNotFoundError(msg)
 
         tables: List[List[List[Optional[str]]]] = []
         metadata: Dict[str, Any] = {}
@@ -80,18 +80,13 @@ class PdfPlumberReader(IPDFReader):
                     page_tables = page.extract_tables()
                     if page_tables:
                         tables.extend(page_tables)
-                        self._logger.debug(
-                            f"  Page {page_num}: {len(page_tables)} table(s) extracted."
-                        )
-                    else:
-                        self._logger.debug(f"  Page {page_num}: no tables detected.")
 
         except (PDFFileNotFoundError, ExtractionError):
             raise
         except Exception as exc:
-            raise ExtractionError(
-                f"pdfplumber failed while reading '{file_path}': {exc}"
-            ) from exc
+            msg = f"pdfplumber failed while reading '{file_path}': {exc}"
+            self._logger.error(msg, exc_info=True)
+            raise ExtractionError(msg) from exc
 
         self._logger.info(
             f"PdfPlumberReader: extraction complete — "

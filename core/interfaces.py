@@ -30,6 +30,22 @@ class ILogger(ABC):
     """Contract for structured logging across all layers."""
 
     @abstractmethod
+    def debug(self, message: str) -> None:
+        """Emit a DEBUG-level log entry.
+
+        Args:
+            message: Human-readable debug message.
+        """
+
+    @abstractmethod
+    def info(self, message: str) -> None:
+        """Emit an INFO-level log entry.
+
+        Args:
+            message: Human-readable informational message.
+        """
+
+    @abstractmethod
     def warning(self, message: str) -> None:
         """Emit a WARNING-level log entry.
 

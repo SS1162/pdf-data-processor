@@ -41,10 +41,6 @@ class ReportRegistry:
     ) -> None:
         self._strategies: List[IReportStrategy] = list(strategies)
         self._logger = logger
-        self._logger.debug(
-            f"ReportRegistry: initialised with "
-            f"{[type(s).__name__ for s in self._strategies]}."
-        )
 
     # ------------------------------------------------------------------
     # Public API
@@ -78,13 +74,12 @@ class ReportRegistry:
         """
         for strategy in self._strategies:
             if strategy.can_handle(raw_data):
-                self._logger.info(
-                    f"ReportRegistry: strategy matched -> '{type(strategy).__name__}'."
-                )
                 return strategy
 
         registered_names = [type(s).__name__ for s in self._strategies]
-        raise StrategyNotFoundError(
+        msg = (
             f"No registered strategy can handle the provided data. "
             f"Registered: {registered_names}"
         )
+        self._logger.error(msg)
+        raise StrategyNotFoundError(msg)

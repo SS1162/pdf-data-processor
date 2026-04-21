@@ -121,21 +121,17 @@ class OvertimeAttendanceStrategy(IReportStrategy):
         """
         header_row, _, _ = self._locate_header_row(raw_data)
         if header_row is None:
-            raise ValidationError(
-                f"No header row found. Required columns: {REQUIRED_COLUMNS}"
-            )
+            msg = f"No header row found. Required columns: {REQUIRED_COLUMNS}"
+            self._logger.error(msg)
+            raise ValidationError(msg)
 
         found: Set[str] = {str(c).strip() for c in header_row if c}
         missing = REQUIRED_COLUMNS - found
         if missing:
-            raise ValidationError(
-                f"OvertimeAttendanceStrategy: missing columns: {missing}"
-            )
+            msg = f"OvertimeAttendanceStrategy: missing columns: {missing}"
+            self._logger.error(msg)
+            raise ValidationError(msg)
 
-        self._logger.info(
-            "OvertimeAttendanceStrategy: schema validation passed — "
-            "all required columns present."
-        )
         return True
 
     def parse(self, raw_data: RawFileData) -> BaseReportDTO:
@@ -157,16 +153,18 @@ class OvertimeAttendanceStrategy(IReportStrategy):
         """
         header_row, table_idx, header_row_idx = self._locate_header_row(raw_data)
         if header_row is None:
-            raise ParseError("parse() called without a valid header row in raw data.")
+            msg = "parse() called without a valid header row in raw data."
+            self._logger.error(msg)
+            raise ParseError(msg)
 
         headers: List[str] = [str(c).strip() if c else "" for c in header_row]
         col_map: dict[str, int] = {n: i for i, n in enumerate(headers) if n}
 
         for required in REQUIRED_COLUMNS:
             if required not in col_map:
-                raise ParseError(
-                    f"Required column '{required}' missing from parsed headers: {headers}"
-                )
+                msg = f"Required column '{required}' missing from parsed headers: {headers}"
+                self._logger.error(msg)
+                raise ParseError(msg)
 
         # Resolve the day-of-week column dynamically
         day_col: str = self._resolve_day_column(col_map)
@@ -222,10 +220,12 @@ class OvertimeAttendanceStrategy(IReportStrategy):
             TransformError: When an unrecoverable error occurs during aggregation.
         """
         if not isinstance(report, OvertimeReportDTO):
-            raise TransformError(
+            msg = (
                 f"OvertimeAttendanceStrategy.transform expects OvertimeReportDTO, "
                 f"got {type(report).__name__}"
             )
+            self._logger.error(msg)
+            raise TransformError(msg)
         try:
             ph = self._parse_hours
             total_hours: float = sum(ph(r.total_hours) for r in report.records)
@@ -237,7 +237,9 @@ class OvertimeAttendanceStrategy(IReportStrategy):
                 if r.entry_time or r.exit_time
             )
         except Exception as exc:
-            raise TransformError(f"Aggregation failed: {exc}") from exc
+            msg = f"Aggregation failed: {exc}"
+            self._logger.error(msg, exc_info=True)
+            raise TransformError(msg) from exc
 
         self._logger.info(
             f"OvertimeAttendanceStrategy.transform: total={total_hours:.2f}h, "

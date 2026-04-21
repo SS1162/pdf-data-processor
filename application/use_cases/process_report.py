@@ -84,18 +84,11 @@ class ProcessReportUseCase:
             TransformError: If a business-logic transformation rule fails.
             GenerationError: If the output file cannot be written.
         """
-        self._logger.info(
-            f"ProcessReportUseCase: starting pipeline for '{input_path}'"
-        )
-
         # Step 1 — Extract
         raw_data = self._reader.extract(input_path)
 
         # Step 2 — Resolve strategy
         strategy = self._registry.resolve(raw_data)
-        self._logger.info(
-            f"ProcessReportUseCase: resolved strategy '{type(strategy).__name__}'"
-        )
 
         # Step 3 — Validate
         strategy.validate(raw_data)

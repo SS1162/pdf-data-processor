@@ -69,12 +69,12 @@ class ExcelReportGenerator(IPDFGenerator):
             import openpyxl
             from openpyxl.styles import Alignment, Font, PatternFill
         except ImportError as exc:
-            raise GenerationError(
+            msg = (
                 "openpyxl is required for Excel generation. "
                 "Install it with: pip install openpyxl"
-            ) from exc
-
-        self._logger.info(f"ExcelReportGenerator: generating '{output_path}'")
+            )
+            self._logger.error(msg)
+            raise GenerationError(msg) from exc
 
         try:
             wb = openpyxl.Workbook()
@@ -149,9 +149,9 @@ class ExcelReportGenerator(IPDFGenerator):
         except GenerationError:
             raise
         except Exception as exc:
-            raise GenerationError(
-                f"Failed to write Excel report to '{output_path}': {exc}"
-            ) from exc
+            msg = f"Failed to write Excel report to '{output_path}': {exc}"
+            self._logger.error(msg, exc_info=True)
+            raise GenerationError(msg) from exc
 
         self._logger.info(
             f"ExcelReportGenerator: report saved successfully -> '{output_path}'"

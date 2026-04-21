@@ -58,6 +58,22 @@ class StandardLogger(ILogger):
     # ILogger implementation
     # ------------------------------------------------------------------
 
+    def debug(self, message: str) -> None:
+        """Emit a DEBUG-level log entry.
+
+        Args:
+            message: Human-readable debug message.
+        """
+        self._logger.debug(message)
+
+    def info(self, message: str) -> None:
+        """Emit an INFO-level log entry.
+
+        Args:
+            message: Human-readable informational message.
+        """
+        self._logger.info(message)
+
     def warning(self, message: str) -> None:
         """Emit a WARNING-level log entry.
 

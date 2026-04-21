@@ -107,21 +107,17 @@ class HebrewAttendanceStrategy(IReportStrategy):
         """
         header_row, _, _ = self._locate_header_row(raw_data)
         if header_row is None:
-            raise ValidationError(
-                f"No table header row found. Required columns: {REQUIRED_COLUMNS}"
-            )
+            msg = f"No table header row found. Required columns: {REQUIRED_COLUMNS}"
+            self._logger.error(msg)
+            raise ValidationError(msg)
 
         found: Set[str] = {str(cell).strip() for cell in header_row if cell}
         missing = REQUIRED_COLUMNS - found
         if missing:
-            raise ValidationError(
-                f"Schema validation failed. Missing columns: {missing}"
-            )
+            msg = f"Schema validation failed. Missing columns: {missing}"
+            self._logger.error(msg)
+            raise ValidationError(msg)
 
-        self._logger.info(
-            "HebrewAttendanceStrategy: schema validation passed — "
-            "all required columns present."
-        )
         return True
 
     def parse(self, raw_data: RawFileData) -> BaseReportDTO:
@@ -139,7 +135,9 @@ class HebrewAttendanceStrategy(IReportStrategy):
         """
         header_row, table_idx, header_row_idx = self._locate_header_row(raw_data)
         if header_row is None:
-            raise ParseError("parse() called without a valid header row in raw data.")
+            msg = "parse() called without a valid header row in raw data."
+            self._logger.error(msg)
+            raise ParseError(msg)
 
         headers: List[str] = [str(cell).strip() if cell else "" for cell in header_row]
         col_map: dict[str, int] = {
@@ -149,9 +147,9 @@ class HebrewAttendanceStrategy(IReportStrategy):
         # Guard — every required column must map to an index
         for required in REQUIRED_COLUMNS:
             if required not in col_map:
-                raise ParseError(
-                    f"Required column '{required}' not in parsed headers: {headers}"
-                )
+                msg = f"Required column '{required}' not in parsed headers: {headers}"
+                self._logger.error(msg)
+                raise ParseError(msg)
 
         records: List[AttendanceRecord] = []
         table = raw_data.tables[table_idx]
@@ -201,10 +199,12 @@ class HebrewAttendanceStrategy(IReportStrategy):
             TransformError: When an unrecoverable error occurs during aggregation.
         """
         if not isinstance(report, ReportDTO):
-            raise TransformError(
+            msg = (
                 f"HebrewAttendanceStrategy.transform expects ReportDTO, "
                 f"got {type(report).__name__}"
             )
+            self._logger.error(msg)
+            raise TransformError(msg)
         try:
             total_hours: float = sum(
                 self._parse_hours(r.total_hours) for r in report.records
@@ -213,7 +213,9 @@ class HebrewAttendanceStrategy(IReportStrategy):
                 1 for r in report.records if r.entry_time or r.exit_time
             )
         except Exception as exc:
-            raise TransformError(f"Aggregation failed: {exc}") from exc
+            msg = f"Aggregation failed: {exc}"
+            self._logger.error(msg, exc_info=True)
+            raise TransformError(msg) from exc
 
         self._logger.info(
             f"HebrewAttendanceStrategy.transform: "
