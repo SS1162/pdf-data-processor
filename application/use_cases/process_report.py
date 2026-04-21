@@ -8,19 +8,19 @@ imports nothing from ``infrastructure/``.
 Dependency graph (runtime, wired by :class:`~container.Container`)::
 
     Container
-        ├── PdfPlumberReader  ──► IPDFReader
-        ├── ExcelReportGenerator ► IPDFGenerator
+        ├── PdfPlumberReader  ──► IReader
+        ├── ExcelReportGenerator ► IGenerator
         ├── ReportRegistry
         │       └── HebrewAttendanceStrategy ► IReportStrategy
         └── ProcessReportUseCase
-                ├── reader:    IPDFReader
-                ├── generator: IPDFGenerator
+                ├── reader:    IReader
+                ├── generator: IGenerator
                 ├── registry:  ReportRegistry
                 └── logger:    ILogger
 """
 from __future__ import annotations
 
-from core.interfaces import ILogger, IPDFGenerator, IPDFReader
+from core.interfaces import IGenerator, ILogger, IReader
 from application.registry import ReportRegistry
 
 
@@ -41,8 +41,8 @@ class ProcessReportUseCase:
     trivially testable with mocks.
 
     Args:
-        reader: Concrete implementation of :class:`~core.interfaces.IPDFReader`.
-        generator: Concrete implementation of :class:`~core.interfaces.IPDFGenerator`.
+        reader: Concrete implementation of :class:`~core.interfaces.IReader`.
+        generator: Concrete implementation of :class:`~core.interfaces.IGenerator`.
         registry: Configured :class:`~application.registry.ReportRegistry` holding
             all registered strategies.
         logger: An :class:`~core.interfaces.ILogger` instance.
@@ -54,8 +54,8 @@ class ProcessReportUseCase:
 
     def __init__(
         self,
-        reader: IPDFReader,
-        generator: IPDFGenerator,
+        reader: IReader,
+        generator: IGenerator,
         registry: ReportRegistry,
         logger: ILogger,
     ) -> None:

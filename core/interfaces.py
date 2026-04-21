@@ -64,12 +64,12 @@ class ILogger(ABC):
 
 
 # ---------------------------------------------------------------------------
-# PDF Reader interface
+# Generic Reader interface
 # ---------------------------------------------------------------------------
 
 
-class IPDFReader(ABC):
-    """Contract for extracting raw tabular data from a PDF source file."""
+class IReader(ABC):
+    """Generic contract for extracting raw tabular data from an input file."""
 
     @abstractmethod
     def extract(self, file_path: str) -> "RawFileData":
@@ -84,8 +84,17 @@ class IPDFReader(ABC):
 
         Raises:
             PDFFileNotFoundError: If *file_path* does not exist.
-            ExtractionError: If the PDF cannot be opened or parsed.
+            ExtractionError: If the file cannot be opened or parsed.
         """
+
+
+# ---------------------------------------------------------------------------
+# PDF Reader interface
+# ---------------------------------------------------------------------------
+
+
+class IPDFReader(IReader):
+    """Specialized reader contract for PDF source files."""
 
 
 # ---------------------------------------------------------------------------
@@ -166,23 +175,34 @@ class IReportStrategy(ABC):
 
 
 # ---------------------------------------------------------------------------
-# PDF / Report Generator interface
+# Generic Generator interface
 # ---------------------------------------------------------------------------
 
 
-class IPDFGenerator(ABC):
-    """Contract for writing a processed report to an output file."""
+class IGenerator(ABC):
+    """Generic contract for serialising a processed report to any output format.
+
+    Concrete implementations may produce Excel, HTML, plain-text, JSON, or any
+    other format — the use-case layer never needs to know which.
+    """
 
     @abstractmethod
     def generate(self, data: "BaseProcessedReportDTO", output_path: str) -> None:
         """Persist *data* to the file at *output_path*.
 
         Args:
-            data: Fully processed report data (any
-                :class:`~domain.dtos.report_dtos.BaseProcessedReportDTO` subtype)
-                ready for serialisation.
-            output_path: Destination file path (format inferred from extension).
+            data: Fully processed report data ready for serialisation.
+            output_path: Destination file path.
 
         Raises:
             GenerationError: If the file cannot be written.
         """
+
+
+# ---------------------------------------------------------------------------
+# PDF / Report Generator interface
+# ---------------------------------------------------------------------------
+
+
+class IPDFGenerator(IGenerator):
+    """Specialized generator contract for PDF/Excel output formats."""
