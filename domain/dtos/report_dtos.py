@@ -57,7 +57,7 @@ class BaseProcessedReportDTO:
 # ---------------------------------------------------------------------------
 
 
-@dataclass
+@dataclass(frozen=True)
 class RawFileData:
     """Raw, unprocessed data extracted directly from a PDF file.
 
@@ -76,7 +76,7 @@ class RawFileData:
     metadata: Dict[str, Any] = field(default_factory=dict)
 
 
-@dataclass
+@dataclass(frozen=True)
 class AttendanceRecord:
     """A single row in the attendance table as parsed from the raw data.
 
@@ -100,7 +100,7 @@ class AttendanceRecord:
     notes: str
 
 
-@dataclass
+@dataclass(frozen=True)
 class ReportDTO(BaseReportDTO):
     """Structured simple-attendance report produced by :meth:`IReportStrategy.parse`.
 
@@ -122,7 +122,7 @@ class ReportDTO(BaseReportDTO):
     metadata: Dict[str, Any] = field(default_factory=dict)
 
 
-@dataclass
+@dataclass(frozen=True)
 class ProcessedReportDTO(BaseProcessedReportDTO):
     """Fully processed simple-attendance report, ready for :class:`IPDFGenerator`.
 
@@ -150,7 +150,7 @@ class ProcessedReportDTO(BaseProcessedReportDTO):
 # ---------------------------------------------------------------------------
 
 
-@dataclass
+@dataclass(frozen=True)
 class OvertimeRecord:
     """A single row in an overtime-computed attendance table.
 
@@ -181,7 +181,7 @@ class OvertimeRecord:
     value: str
 
 
-@dataclass
+@dataclass(frozen=True)
 class OvertimeReportDTO(BaseReportDTO):
     """Parsed overtime-attendance report produced by :meth:`IReportStrategy.parse`.
 
@@ -200,7 +200,7 @@ class OvertimeReportDTO(BaseReportDTO):
     metadata: Dict[str, Any] = field(default_factory=dict)
 
 
-@dataclass
+@dataclass(frozen=True)
 class OvertimeProcessedReportDTO(BaseProcessedReportDTO):
     """Fully processed overtime-attendance report, ready for :class:`IPDFGenerator`.
 

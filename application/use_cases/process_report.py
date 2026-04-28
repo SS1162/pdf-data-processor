@@ -105,3 +105,4 @@ class ProcessReportUseCase:
         self._logger.info(
             f"ProcessReportUseCase: pipeline complete -> '{output_path}'"
         )
+
